@@ -6,7 +6,7 @@ class HangmanGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Hangman Game")
-        self.root.geometry("800x750")
+        self.root.geometry("900x800")
         self.root.configure(bg="#2c3e50")
         
         # Language settings
@@ -33,6 +33,7 @@ class HangmanGame:
                 "settings": "Settings",
                 "language": "Language:",
                 "close_settings": "Close",
+                "available_words": "Available words:",
                 "categories": {
                     "Animals": ["elephant", "penguin", "butterfly", "crocodile", "kangaroo"],
                     "Programming": ["python", "coding", "hangman", "developer", "programming", "algorithm", "database", "function"],
@@ -62,6 +63,7 @@ class HangmanGame:
                 "settings": "Settings",
                 "language": "Language:",
                 "close_settings": "Close",
+                "available_words": "Available words:",
                 "categories": {
                     "Animals": ["elephant", "penguin", "butterfly", "crocodile", "kangaroo"],
                     "Programming": ["python", "coding", "hangman", "developer", "programming", "algorithm", "database", "function"],
@@ -91,6 +93,7 @@ class HangmanGame:
                 "settings": "Ustawienia",
                 "language": "Język:",
                 "close_settings": "Zamknij",
+                "available_words": "Dostępne słowa:",
                 "categories": {
                     "Zwierzęta": ["słoń", "pingwin", "motyl", "krokodyl", "kangur"],
                     "Programowanie": ["python", "kodowanie", "hangman", "developer", "algorytm", "baza", "funkcja"],
@@ -251,7 +254,7 @@ class HangmanGame:
         
         # Language and Category info frame
         info_frame = tk.Frame(self.root, bg="#34495e")
-        info_frame.pack(pady=10, fill=tk.X, padx=20)
+        info_frame.pack(pady=8, fill=tk.X, padx=20)
         
         self.language_info = tk.Label(info_frame, text="", 
                                      font=("Arial", 11, "bold"),
@@ -262,6 +265,21 @@ class HangmanGame:
                                      font=("Arial", 11, "bold"),
                                      bg="#34495e", fg="#f39c12")
         self.category_info.pack(side=tk.LEFT, padx=15)
+        
+        # Available words panel
+        words_panel_frame = tk.Frame(self.root, bg="#34495e", relief=tk.SUNKEN, bd=1)
+        words_panel_frame.pack(pady=8, fill=tk.X, padx=20)
+        
+        words_label = tk.Label(words_panel_frame, text=self.get_text("available_words"),
+                              font=("Arial", 10, "bold"),
+                              bg="#34495e", fg="#2ecc71")
+        words_label.pack(anchor=tk.W, padx=10, pady=(5, 2))
+        
+        self.words_display = tk.Label(words_panel_frame, text="",
+                                     font=("Arial", 9),
+                                     bg="#34495e", fg="#ecf0f1",
+                                     wraplength=800, justify=tk.LEFT)
+        self.words_display.pack(anchor=tk.W, padx=10, pady=(2, 5))
         
         # Hangman display
         self.hangman_label = tk.Label(self.root, text="", 
@@ -484,9 +502,15 @@ class HangmanGame:
         self.guessed_label.config(text=guessed_text)
     
     def update_info(self):
-        """Update language and category info display"""
+        """Update language, category, and available words info display"""
         self.language_info.config(text=f"Language: {self.current_language}")
         self.category_info.config(text=f"Category: {self.current_category}")
+        
+        # Get available words for current category
+        categories_dict = self.languages[self.current_language]["categories"]
+        available_words = categories_dict.get(self.current_category, [])
+        words_text = ", ".join(available_words)
+        self.words_display.config(text=words_text)
     
     def new_game(self):
         """Start a new game with randomly selected category"""
