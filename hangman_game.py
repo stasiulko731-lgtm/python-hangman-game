@@ -6,8 +6,15 @@ class HangmanGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Hangman Game")
-        self.root.geometry("900x800")
-        self.root.configure(bg="#2c3e50")
+        
+        # Get screen dimensions and set window size responsively
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        window_width = int(screen_width * 0.95)
+        window_height = int(screen_height * 0.95)
+        
+        self.root.geometry(f"{window_width}x{window_height}")
+        self.root.configure(bg="#1a252f")
         
         # Language settings
         self.languages = {
@@ -104,7 +111,7 @@ class HangmanGame:
         }
         
         self.current_language = "English (UK)"
-        self.current_category = ""
+        self.current_category = "Animals"  # Start with a fixed category
         self.word = ""
         self.guessed = []
         self.attempts = 10
@@ -233,123 +240,138 @@ class HangmanGame:
         return self.languages[self.current_language].get(key, key)
     
     def setup_ui(self):
+        # Main container with padding
+        main_container = tk.Frame(self.root, bg="#1a252f")
+        main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
         # Top frame with title and settings button
-        top_frame = tk.Frame(self.root, bg="#2c3e50")
-        top_frame.pack(pady=10, fill=tk.X, padx=20)
+        top_frame = tk.Frame(main_container, bg="#2c3e50", relief=tk.RAISED, bd=2)
+        top_frame.pack(pady=(0, 20), fill=tk.X)
         
         # Title
         title = tk.Label(top_frame, text="🎮 HANGMAN GAME 🎮", 
-                         font=("Arial", 24, "bold"), 
-                         bg="#2c3e50", fg="#ecf0f1")
+                         font=("Helvetica", 36, "bold"), 
+                         bg="#2c3e50", fg="#ecf0f1", pady=15)
         title.pack(side=tk.LEFT, expand=True)
         
         # Settings button (gear emoji)
         settings_btn = tk.Button(top_frame, text="⚙️", 
                                 command=self.open_settings,
-                                font=("Arial", 20),
+                                font=("Arial", 28),
                                 bg="#34495e", fg="white",
                                 relief=tk.FLAT,
-                                padx=10, pady=5)
-        settings_btn.pack(side=tk.RIGHT)
+                                padx=15, pady=10,
+                                activebackground="#2c3e50")
+        settings_btn.pack(side=tk.RIGHT, padx=15)
         
-        # Language and Category info frame
-        info_frame = tk.Frame(self.root, bg="#34495e")
-        info_frame.pack(pady=8, fill=tk.X, padx=20)
+        # Info frame with language, category, and words
+        info_frame = tk.Frame(main_container, bg="#34495e", relief=tk.SUNKEN, bd=2)
+        info_frame.pack(pady=(0, 20), fill=tk.X)
         
-        self.language_info = tk.Label(info_frame, text="", 
-                                     font=("Arial", 11, "bold"),
+        # Top info line
+        top_info = tk.Frame(info_frame, bg="#34495e")
+        top_info.pack(fill=tk.X, padx=15, pady=10)
+        
+        self.language_info = tk.Label(top_info, text="", 
+                                     font=("Helvetica", 13, "bold"),
                                      bg="#34495e", fg="#ecf0f1")
         self.language_info.pack(side=tk.LEFT, padx=15)
         
-        self.category_info = tk.Label(info_frame, text="", 
-                                     font=("Arial", 11, "bold"),
+        self.category_info = tk.Label(top_info, text="", 
+                                     font=("Helvetica", 13, "bold"),
                                      bg="#34495e", fg="#f39c12")
         self.category_info.pack(side=tk.LEFT, padx=15)
         
         # Available words panel
-        words_panel_frame = tk.Frame(self.root, bg="#34495e", relief=tk.SUNKEN, bd=1)
-        words_panel_frame.pack(pady=8, fill=tk.X, padx=20)
-        
-        words_label = tk.Label(words_panel_frame, text=self.get_text("available_words"),
-                              font=("Arial", 10, "bold"),
+        words_label = tk.Label(info_frame, text="",
+                              font=("Helvetica", 11, "bold"),
                               bg="#34495e", fg="#2ecc71")
-        words_label.pack(anchor=tk.W, padx=10, pady=(5, 2))
+        words_label.pack(anchor=tk.W, padx=15, pady=(0, 5))
+        self.words_label_ref = words_label
         
-        self.words_display = tk.Label(words_panel_frame, text="",
-                                     font=("Arial", 9),
+        self.words_display = tk.Label(info_frame, text="",
+                                     font=("Helvetica", 10),
                                      bg="#34495e", fg="#ecf0f1",
-                                     wraplength=800, justify=tk.LEFT)
-        self.words_display.pack(anchor=tk.W, padx=10, pady=(2, 5))
+                                     wraplength=1200, justify=tk.LEFT)
+        self.words_display.pack(anchor=tk.W, padx=15, pady=(0, 10))
+        
+        # Game content frame (center)
+        game_frame = tk.Frame(main_container, bg="#1a252f")
+        game_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
         
         # Hangman display
-        self.hangman_label = tk.Label(self.root, text="", 
-                                      font=("Courier", 9), 
-                                      bg="#2c3e50", fg="#e74c3c")
-        self.hangman_label.pack(pady=5)
+        self.hangman_label = tk.Label(game_frame, text="", 
+                                      font=("Courier", 11), 
+                                      bg="#1a252f", fg="#e74c3c")
+        self.hangman_label.pack(pady=10)
         
         # Word display
-        self.word_label = tk.Label(self.root, text="", 
-                                   font=("Arial", 32, "bold"), 
-                                   bg="#2c3e50", fg="#3498db")
-        self.word_label.pack(pady=15)
+        self.word_label = tk.Label(game_frame, text="", 
+                                   font=("Helvetica", 48, "bold"), 
+                                   bg="#1a252f", fg="#3498db")
+        self.word_label.pack(pady=20)
         
         # Attempts counter
-        self.attempts_label = tk.Label(self.root, text="", 
-                                       font=("Arial", 14, "bold"), 
-                                       bg="#2c3e50", fg="#f39c12")
-        self.attempts_label.pack(pady=5)
+        self.attempts_label = tk.Label(game_frame, text="", 
+                                       font=("Helvetica", 16, "bold"), 
+                                       bg="#1a252f", fg="#f39c12")
+        self.attempts_label.pack(pady=10)
         
         # Guessed letters
-        self.guessed_label = tk.Label(self.root, text="", 
-                                      font=("Arial", 10), 
-                                      bg="#2c3e50", fg="#2ecc71", 
-                                      wraplength=600)
-        self.guessed_label.pack(pady=10)
+        self.guessed_label = tk.Label(game_frame, text="", 
+                                      font=("Helvetica", 12), 
+                                      bg="#1a252f", fg="#2ecc71", 
+                                      wraplength=1200)
+        self.guessed_label.pack(pady=15)
         
         # Input frame for letter
-        input_frame = tk.Frame(self.root, bg="#2c3e50")
-        input_frame.pack(pady=15)
+        input_frame = tk.Frame(main_container, bg="#1a252f")
+        input_frame.pack(pady=(0, 20))
         
         self.guess_letter_label = tk.Label(input_frame, text="Guess a letter:", 
-                 font=("Arial", 12), 
-                 bg="#2c3e50", fg="#ecf0f1")
-        self.guess_letter_label.pack(side=tk.LEFT, padx=5)
+                 font=("Helvetica", 13), 
+                 bg="#1a252f", fg="#ecf0f1")
+        self.guess_letter_label.pack(side=tk.LEFT, padx=10)
         
-        self.input_entry = tk.Entry(input_frame, font=("Arial", 12), width=5)
-        self.input_entry.pack(side=tk.LEFT, padx=5)
+        self.input_entry = tk.Entry(input_frame, font=("Helvetica", 14), width=5)
+        self.input_entry.pack(side=tk.LEFT, padx=10)
         self.input_entry.bind("<Return>", lambda event: self.guess_letter())
         
         self.guess_btn = tk.Button(input_frame, text="Guess Letter", 
                               command=self.guess_letter, 
-                              font=("Arial", 10, "bold"),
+                              font=("Helvetica", 11, "bold"),
                               bg="#3498db", fg="white", 
-                              padx=15, relief=tk.RAISED)
-        self.guess_btn.pack(side=tk.LEFT, padx=5)
+                              padx=20, pady=8, relief=tk.RAISED,
+                              activebackground="#2980b9")
+        self.guess_btn.pack(side=tk.LEFT, padx=10)
         
         # Button frame
-        button_frame = tk.Frame(self.root, bg="#2c3e50")
-        button_frame.pack(pady=10)
+        button_frame = tk.Frame(main_container, bg="#1a252f")
+        button_frame.pack(pady=(0, 10))
         
         self.guess_word_btn = tk.Button(button_frame, text="Guess Word (-2)", 
                                    command=self.guess_word, 
-                                   font=("Arial", 10, "bold"),
+                                   font=("Helvetica", 11, "bold"),
                                    bg="#9b59b6", fg="white", 
-                                   padx=15, relief=tk.RAISED)
-        self.guess_word_btn.pack(side=tk.LEFT, padx=5)
+                                   padx=20, pady=8, relief=tk.RAISED,
+                                   activebackground="#8e44ad")
+        self.guess_word_btn.pack(side=tk.LEFT, padx=10)
         
         self.new_game_btn = tk.Button(button_frame, text="New Game", 
                                  command=self.new_game, 
-                                 font=("Arial", 10, "bold"),
+                                 font=("Helvetica", 11, "bold"),
                                  bg="#2ecc71", fg="white", 
-                                 padx=15, relief=tk.RAISED)
-        self.new_game_btn.pack(side=tk.LEFT, padx=5)
+                                 padx=20, pady=8, relief=tk.RAISED,
+                                 activebackground="#27ae60")
+        self.new_game_btn.pack(side=tk.LEFT, padx=10)
         
         self.quit_btn = tk.Button(button_frame, text="Quit", 
                              command=self.root.quit, 
-                             font=("Arial", 10, "bold"),
+                             font=("Helvetica", 11, "bold"),
                              bg="#e74c3c", fg="white", 
-                             padx=15, relief=tk.RAISED)
-        self.quit_btn.pack(side=tk.LEFT, padx=5)
+                             padx=20, pady=8, relief=tk.RAISED,
+                             activebackground="#c0392b")
+        self.quit_btn.pack(side=tk.LEFT, padx=10)
     
     def open_settings(self):
         """Open settings window"""
@@ -359,39 +381,39 @@ class HangmanGame:
         
         self.settings_window = tk.Toplevel(self.root)
         self.settings_window.title(self.get_text("settings"))
-        self.settings_window.geometry("300x150")
+        self.settings_window.geometry("400x200")
         self.settings_window.configure(bg="#2c3e50")
         
         # Settings title
         settings_title = tk.Label(self.settings_window, 
                                  text=self.get_text("settings"),
-                                 font=("Arial", 16, "bold"),
+                                 font=("Helvetica", 18, "bold"),
                                  bg="#2c3e50", fg="#ecf0f1")
-        settings_title.pack(pady=15)
+        settings_title.pack(pady=20)
         
         # Language frame
         lang_frame = tk.Frame(self.settings_window, bg="#2c3e50")
-        lang_frame.pack(pady=10)
+        lang_frame.pack(pady=15)
         
         tk.Label(lang_frame, text=self.get_text("language"),
-                font=("Arial", 12),
-                bg="#2c3e50", fg="#ecf0f1").pack(side=tk.LEFT, padx=10)
+                font=("Helvetica", 13),
+                bg="#2c3e50", fg="#ecf0f1").pack(side=tk.LEFT, padx=15)
         
         self.language_var = tk.StringVar(value=self.current_language)
         language_menu = tk.OptionMenu(lang_frame, self.language_var,
                                      *self.languages.keys(),
                                      command=self.change_language)
-        language_menu.config(font=("Arial", 11), bg="#3498db", fg="white", width=15)
-        language_menu.pack(side=tk.LEFT, padx=10)
+        language_menu.config(font=("Helvetica", 12), bg="#3498db", fg="white", width=18)
+        language_menu.pack(side=tk.LEFT, padx=15)
         
         # Close button
         close_btn = tk.Button(self.settings_window, 
                             text=self.get_text("close_settings"),
                             command=self.close_settings,
-                            font=("Arial", 11, "bold"),
+                            font=("Helvetica", 12, "bold"),
                             bg="#2ecc71", fg="white",
-                            padx=20, pady=10)
-        close_btn.pack(pady=15)
+                            padx=25, pady=10)
+        close_btn.pack(pady=20)
         
         # Handle window close
         self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
@@ -403,10 +425,13 @@ class HangmanGame:
             self.settings_window = None
     
     def change_language(self, language):
-        """Change the game language"""
+        """Change the game language (keeping category)"""
         self.current_language = language
         self.update_ui_text()
-        self.new_game()
+        # Keep current category, but pick a new word
+        self.pick_new_word()
+        self.update_info()
+        self.update_display()
     
     def update_ui_text(self):
         """Update all UI text based on current language"""
@@ -415,6 +440,7 @@ class HangmanGame:
         self.guess_word_btn.config(text=self.get_text("guess_word_btn"))
         self.new_game_btn.config(text=self.get_text("new_game_btn"))
         self.quit_btn.config(text=self.get_text("quit_btn"))
+        self.words_label_ref.config(text=self.get_text("available_words"))
     
     def guess_letter(self):
         if self.game_over:
@@ -512,14 +538,24 @@ class HangmanGame:
         words_text = ", ".join(available_words)
         self.words_display.config(text=words_text)
     
+    def pick_new_word(self):
+        """Pick a new word from the current category"""
+        categories_dict = self.languages[self.current_language]["categories"]
+        
+        # If category doesn't exist in this language, pick a random one
+        if self.current_category not in categories_dict:
+            self.current_category = random.choice(list(categories_dict.keys()))
+        
+        random_category_words = categories_dict[self.current_category]
+        self.word = random.choice(random_category_words)
+    
     def new_game(self):
         """Start a new game with randomly selected category"""
         categories_dict = self.languages[self.current_language]["categories"]
         category_names = list(categories_dict.keys())
         self.current_category = random.choice(category_names)
         
-        random_category_words = categories_dict[self.current_category]
-        self.word = random.choice(random_category_words)
+        self.pick_new_word()
         
         self.guessed = []
         self.attempts = 10
