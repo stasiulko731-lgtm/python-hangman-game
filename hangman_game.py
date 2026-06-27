@@ -30,8 +30,9 @@ class HangmanGame:
                 "you_guessed": "You Guessed. Click Enter to play again!",
                 "game_over": "Game Over!",
                 "word_was": "The word was:",
+                "settings": "Settings",
                 "language": "Language:",
-                "category": "Category:",
+                "close_settings": "Close",
                 "categories": {
                     "Animals": ["elephant", "penguin", "butterfly", "crocodile", "kangaroo"],
                     "Programming": ["python", "coding", "hangman", "developer", "programming", "algorithm", "database", "function"],
@@ -58,8 +59,9 @@ class HangmanGame:
                 "you_guessed": "You Guessed. Click Enter to play again!",
                 "game_over": "Game Over!",
                 "word_was": "The word was:",
+                "settings": "Settings",
                 "language": "Language:",
-                "category": "Category:",
+                "close_settings": "Close",
                 "categories": {
                     "Animals": ["elephant", "penguin", "butterfly", "crocodile", "kangaroo"],
                     "Programming": ["python", "coding", "hangman", "developer", "programming", "algorithm", "database", "function"],
@@ -86,8 +88,9 @@ class HangmanGame:
                 "you_guessed": "Odgadłeś! Naciśnij Enter aby zagrać ponownie!",
                 "game_over": "Koniec Gry!",
                 "word_was": "Słowem było:",
+                "settings": "Ustawienia",
                 "language": "Język:",
-                "category": "Kategoria:",
+                "close_settings": "Zamknij",
                 "categories": {
                     "Zwierzęta": ["słoń", "pingwin", "motyl", "krokodyl", "kangur"],
                     "Programowanie": ["python", "kodowanie", "hangman", "developer", "algorytm", "baza", "funkcja"],
@@ -98,11 +101,11 @@ class HangmanGame:
         }
         
         self.current_language = "English (UK)"
-        self.current_category = "Programming"
         self.word = ""
         self.guessed = []
         self.attempts = 10
         self.game_over = False
+        self.settings_window = None
         
         # Extended Hangman stages (11 stages total)
         self.hangman_stages = [
@@ -226,37 +229,24 @@ class HangmanGame:
         return self.languages[self.current_language].get(key, key)
     
     def setup_ui(self):
+        # Top frame with title and settings button
+        top_frame = tk.Frame(self.root, bg="#2c3e50")
+        top_frame.pack(pady=10, fill=tk.X, padx=20)
+        
         # Title
-        title = tk.Label(self.root, text="🎮 HANGMAN GAME 🎮", 
+        title = tk.Label(top_frame, text="🎮 HANGMAN GAME 🎮", 
                          font=("Arial", 24, "bold"), 
                          bg="#2c3e50", fg="#ecf0f1")
-        title.pack(pady=10)
+        title.pack(side=tk.LEFT, expand=True)
         
-        # Language and Category frame
-        settings_frame = tk.Frame(self.root, bg="#2c3e50")
-        settings_frame.pack(pady=10)
-        
-        tk.Label(settings_frame, text="Language:", 
-                 font=("Arial", 10), 
-                 bg="#2c3e50", fg="#ecf0f1").pack(side=tk.LEFT, padx=5)
-        
-        self.language_var = tk.StringVar(value=self.current_language)
-        language_menu = tk.OptionMenu(settings_frame, self.language_var, 
-                                      *self.languages.keys(),
-                                      command=self.change_language)
-        language_menu.config(font=("Arial", 10), bg="#3498db", fg="white")
-        language_menu.pack(side=tk.LEFT, padx=5)
-        
-        tk.Label(settings_frame, text="Category:", 
-                 font=("Arial", 10), 
-                 bg="#2c3e50", fg="#ecf0f1").pack(side=tk.LEFT, padx=15)
-        
-        self.category_var = tk.StringVar(value=self.current_category)
-        self.category_menu = tk.OptionMenu(settings_frame, self.category_var, 
-                                           *self.languages[self.current_language]["categories"].keys(),
-                                           command=self.change_category)
-        self.category_menu.config(font=("Arial", 10), bg="#9b59b6", fg="white")
-        self.category_menu.pack(side=tk.LEFT, padx=5)
+        # Settings button (gear emoji)
+        settings_btn = tk.Button(top_frame, text="⚙️", 
+                                command=self.open_settings,
+                                font=("Arial", 20),
+                                bg="#34495e", fg="white",
+                                relief=tk.FLAT,
+                                padx=10, pady=5)
+        settings_btn.pack(side=tk.RIGHT)
         
         # Hangman display
         self.hangman_label = tk.Label(self.root, text="", 
@@ -328,25 +318,61 @@ class HangmanGame:
                              padx=15, relief=tk.RAISED)
         self.quit_btn.pack(side=tk.LEFT, padx=5)
     
+    def open_settings(self):
+        """Open settings window"""
+        if self.settings_window is not None:
+            self.settings_window.lift()
+            return
+        
+        self.settings_window = tk.Toplevel(self.root)
+        self.settings_window.title(self.get_text("settings"))
+        self.settings_window.geometry("300x150")
+        self.settings_window.configure(bg="#2c3e50")
+        
+        # Settings title
+        settings_title = tk.Label(self.settings_window, 
+                                 text=self.get_text("settings"),
+                                 font=("Arial", 16, "bold"),
+                                 bg="#2c3e50", fg="#ecf0f1")
+        settings_title.pack(pady=15)
+        
+        # Language frame
+        lang_frame = tk.Frame(self.settings_window, bg="#2c3e50")
+        lang_frame.pack(pady=10)
+        
+        tk.Label(lang_frame, text=self.get_text("language"),
+                font=("Arial", 12),
+                bg="#2c3e50", fg="#ecf0f1").pack(side=tk.LEFT, padx=10)
+        
+        self.language_var = tk.StringVar(value=self.current_language)
+        language_menu = tk.OptionMenu(lang_frame, self.language_var,
+                                     *self.languages.keys(),
+                                     command=self.change_language)
+        language_menu.config(font=("Arial", 11), bg="#3498db", fg="white", width=15)
+        language_menu.pack(side=tk.LEFT, padx=10)
+        
+        # Close button
+        close_btn = tk.Button(self.settings_window, 
+                            text=self.get_text("close_settings"),
+                            command=self.close_settings,
+                            font=("Arial", 11, "bold"),
+                            bg="#2ecc71", fg="white",
+                            padx=20, pady=10)
+        close_btn.pack(pady=15)
+        
+        # Handle window close
+        self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
+    
+    def close_settings(self):
+        """Close settings window"""
+        if self.settings_window is not None:
+            self.settings_window.destroy()
+            self.settings_window = None
+    
     def change_language(self, language):
         """Change the game language"""
         self.current_language = language
         self.update_ui_text()
-        # Update category menu with new categories
-        categories = list(self.languages[self.current_language]["categories"].keys())
-        self.current_category = categories[0]
-        self.category_var.set(self.current_category)
-        
-        self.category_menu['menu'].delete(0, 'end')
-        for cat in categories:
-            self.category_menu['menu'].add_command(label=cat, 
-                                                   command=tk.StringVar.set(self.category_var, cat))
-        
-        self.new_game()
-    
-    def change_category(self, category):
-        """Change the game category"""
-        self.current_category = category
         self.new_game()
     
     def update_ui_text(self):
@@ -443,8 +469,10 @@ class HangmanGame:
         self.guessed_label.config(text=guessed_text)
     
     def new_game(self):
-        categories = self.languages[self.current_language]["categories"]
-        self.word = random.choice(categories[self.current_category])
+        """Start a new game with randomly selected category"""
+        categories = list(self.languages[self.current_language]["categories"].values())
+        random_category_words = random.choice(categories)
+        self.word = random.choice(random_category_words)
         self.guessed = []
         self.attempts = 10
         self.game_over = False
