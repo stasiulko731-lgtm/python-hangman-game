@@ -6,7 +6,7 @@ class HangmanGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Hangman Game")
-        self.root.geometry("800x700")
+        self.root.geometry("800x750")
         self.root.configure(bg="#2c3e50")
         
         # Language settings
@@ -101,6 +101,7 @@ class HangmanGame:
         }
         
         self.current_language = "English (UK)"
+        self.current_category = ""
         self.word = ""
         self.guessed = []
         self.attempts = 10
@@ -247,6 +248,20 @@ class HangmanGame:
                                 relief=tk.FLAT,
                                 padx=10, pady=5)
         settings_btn.pack(side=tk.RIGHT)
+        
+        # Language and Category info frame
+        info_frame = tk.Frame(self.root, bg="#34495e")
+        info_frame.pack(pady=10, fill=tk.X, padx=20)
+        
+        self.language_info = tk.Label(info_frame, text="", 
+                                     font=("Arial", 11, "bold"),
+                                     bg="#34495e", fg="#ecf0f1")
+        self.language_info.pack(side=tk.LEFT, padx=15)
+        
+        self.category_info = tk.Label(info_frame, text="", 
+                                     font=("Arial", 11, "bold"),
+                                     bg="#34495e", fg="#f39c12")
+        self.category_info.pack(side=tk.LEFT, padx=15)
         
         # Hangman display
         self.hangman_label = tk.Label(self.root, text="", 
@@ -468,16 +483,27 @@ class HangmanGame:
         guessed_text = f"{self.get_text('guessed_letters')} {', '.join(sorted(self.guessed)) if self.guessed else self.get_text('none_yet')}"
         self.guessed_label.config(text=guessed_text)
     
+    def update_info(self):
+        """Update language and category info display"""
+        self.language_info.config(text=f"Language: {self.current_language}")
+        self.category_info.config(text=f"Category: {self.current_category}")
+    
     def new_game(self):
         """Start a new game with randomly selected category"""
-        categories = list(self.languages[self.current_language]["categories"].values())
-        random_category_words = random.choice(categories)
+        categories_dict = self.languages[self.current_language]["categories"]
+        category_names = list(categories_dict.keys())
+        self.current_category = random.choice(category_names)
+        
+        random_category_words = categories_dict[self.current_category]
         self.word = random.choice(random_category_words)
+        
         self.guessed = []
         self.attempts = 10
         self.game_over = False
-        self.input_entry.delete(0, tk.END)
+        self.input_entry.delete(0, tk.endl)
         self.input_entry.focus()
+        
+        self.update_info()
         self.update_display()
 
 if __name__ == "__main__":
