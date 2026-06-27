@@ -500,7 +500,7 @@ class HangmanGame:
         self.guessed = []
         self.attempts = 10
         self.game_over = False
-        self.input_entry.delete(0, tk.endl)
+        self.input_entry.delete(0, tk.END)
         self.input_entry.focus()
         
         self.update_info()
